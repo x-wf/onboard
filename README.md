@@ -7,7 +7,6 @@
 Install yarn
 `brew install yarn`
 
-
 Install dependencies:
 `yarn install`
 
@@ -26,9 +25,3 @@ You can then run
 `yarn dist`
 
 You can now find the `mac/Radix Onboard.app` under `dist`
-
-
-# Code Signing
-
-Follow this documentation in case you need to code-sign the app:
-https://radixdlt.atlassian.net/wiki/spaces/RR/pages/526778397/Radix+Desktop+Wallet
