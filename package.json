@@ -1,0 +1,27 @@
+{
+  "name": "radix-onboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron . --enable-transparent-visuals --disable-gpu",
+    "dist": "electron-builder --config electron-builder.yml",
+    "dist:mac": "electron-builder --mac --config electron-builder.yml"
+  },
+  "author": {
+    "name": "RadixDLT",
+    "email": "devops@radixdlt.com",
+    "url": "https://radixdlt.com"
+  },
+  "license": "ISC",
+  "private": true,
+  "devDependencies": {
+    "electron": "^6.0.9",
+    "electron-builder": "^21.2.0",
+    "electron-packager": "^14.0.6"
+  },
+  "dependencies": {
+    "jquery": "^3.4.1",
+    "sudo-prompt": "^9.0.0"
+  }
+}

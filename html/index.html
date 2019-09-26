@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html class="main_html">
+
+  <head>
+    <meta charset="utf-8">
+    <!-- MAIN WINDOW TITLE HERE -->
+    <title>Guide</title>
+
+    <!-- CSS FILES -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  
+
+  <body class="main_body">
+    
+    <!-- JS FILES -->
+    <script>const { ipcRenderer } = require('electron');</script>
+    <script>window.$ = window.jQuery = require('jquery');</script>
+    <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
+    <script src="js/start.js"></script>
+    <script src="js/yubikey.js"></script>
+
+    <!-- Slider main container -->
+    <div class="header">
+      <div class="slider">
+          <div><iframe id="welcome" src="pages/0_welcome.html"></iframe></div>
+          <div><iframe id="identity" src="pages/1_identity.html"></iframe></div>
+          <div><iframe id="passwords" src="pages/2_passwords.html"></iframe></div>
+          <div><iframe id="yubikeys" src="pages/3_yubikeys.html"></iframe></div>
+      </div>
+    </div>
+  </body>
+</html>

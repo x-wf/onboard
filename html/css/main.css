@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+.main_html {
+    height:97.31%;
+}
+.main_body {
+    height:97.31%;
+}
+.header {
+    height:100%; display: flex; align-items: center; text-align: center; flex-direction: column; /* justify-content: center;  */
+}
+.page-title {
+    color:rgb(120, 211, 120); text-shadow: 0 0 2px #000000; font-family: 'Open Sans', sans-serif; font-weight: 900;   text-transform: uppercase; margin-top: 123px;
+}
+.page-description {
+    color:rgb(219, 250, 219);  font-family: 'Open Sans', sans-serif;
+}
+.main-text-color {
+    color:rgb(219, 250, 219);
+}
+.logo {
+    width: 250px;
+}
+.software-row {
+    display: flex;
+    flex-direction: row;
+}
+.software-wrapper {
+    padding: 13px;
+}
+.software-logo {
+    width:50px;
+    height:50px;
+}
+.software-title {
+    margin-bottom: 5px!important;
+    color:rgb(219, 250, 219)!important;
+}
+
+/* FULL HEIGHT FOR PAGE SLIDER */
+.bx-viewport, .slider, iframe, .slider div{
+    height: 100%!important;
+}
+.bx-wrapper {
+    height: 100%;
+    background-color: transparent!important;
+    border: 0!important;
+    box-shadow: none!important;
+    -webkit-box-shadow: none!important;
+}
+.slider iframe {
+    width: 100%!important;
+    overflow: hidden;
+    border:0!important;
+}
+.v-center {
+    justify-content: center;
+}
