@@ -31,7 +31,7 @@ function createPlist() {
 
     exec(command, (err, stdout, stderr) => {
         if (err) throw err;
-        console.log('stdout: ' + stdout);
+        console.log('Creating plist output: ' + stdout);
     });
 }
 

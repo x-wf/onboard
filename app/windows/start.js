@@ -1,5 +1,6 @@
 const { BrowserWindow, ipcMain } = require('electron')
-const yubikeys = require('./yubikey')
+const yubikeys = require('../yubikey')
+const persist = require('../persist')
 const path = require('path')
 
 
@@ -15,21 +16,24 @@ function getWindow() {
 
 function createWindow (app) {
     if (window == undefined) {
+
+        // Window config
         window = new BrowserWindow({
             width: 800,
             height: 600,
             frame: true,
-            // maximizable: false,
-            // resizable: false,
+            maximizable: false,
+            resizable: false,
             fullscreenWindowTitle: "true",
             vibrancy: "dark", //dark, light, appearance-based
-            icon: path.join(__dirname, '../html/img/radix-icon.png'),
+            icon: path.join(__dirname, '../../html/img/radix-icon.png'),
             webPreferences: {
                 nodeIntegration: true,
                 experimentalFeatures: true
             },
         })
 
+        // Load page
         window.loadFile('./html/index.html')
         window.on('closed', (event) => {
             // run in background
@@ -41,17 +45,10 @@ function createWindow (app) {
 
         // register IPC's here
         yubikeys.registerIpc(ipcMain)
+        persist.registerIpc(ipcMain)
     }
     return window
 }
-
-// More functions for business logic
-// e.g. autostart, yubikeys, icontray
-
-// 1 - ICONTRAY
-// 2 - YUBIKEYS
-// 3 - RUN AS SUDO (e.g. read/write tunnelblick config, by default not sudo)
-// 4 - MAKE AUTOSTART
 
 module.exports.createWindow = createWindow
 module.exports.destroyWindow = destroyWindow

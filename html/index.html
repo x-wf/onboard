@@ -9,6 +9,7 @@
     <!-- CSS FILES -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/scrollbar.css">
   </head>
   
 
@@ -18,16 +19,24 @@
     <script>const { ipcRenderer } = require('electron');</script>
     <script>window.$ = window.jQuery = require('jquery');</script>
     <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
+    <script src="js/index.js"></script>
     <script src="js/start.js"></script>
     <script src="js/yubikey.js"></script>
 
     <!-- Slider main container -->
-    <div class="header">
+    <div class="header no-padding-x">
       <div class="slider">
           <div><iframe id="welcome" src="pages/0_welcome.html"></iframe></div>
-          <div><iframe id="identity" src="pages/1_identity.html"></iframe></div>
-          <div><iframe id="passwords" src="pages/2_passwords.html"></iframe></div>
-          <div><iframe id="yubikeys" src="pages/3_yubikeys.html"></iframe></div>
+          <div><iframe id="index" src="pages/0_index.html"></iframe></div>
+          <div><iframe id="personal_password_policy" src="pages/1_personal_password_policy.html"></iframe></div>
+          <div><iframe id="mfa" src="pages/2_mfa.html"></iframe></div>
+          <div><iframe id="1password_1" src="pages/3_1password_1.html"></iframe></div>
+          <div><iframe id="1password_2" src="pages/3_1password_2.html"></iframe></div>
+          <div><iframe id="identity_management" src="pages/4_identity_management.html"></iframe></div>
+          <div><iframe id="yubikey_setup" src="pages/5_yubikey_setup.html"></iframe></div>
+          <div><iframe id="mail_signing_1" src="pages/6_mail_signing_1.html"></iframe></div>
+          <div><iframe id="mail_signing_2" src="pages/6_mail_signing_2.html"></iframe></div>
+          <div><iframe id="personal_integrity" src="pages/7_personal_integrity.html"></iframe></div>
       </div>
     </div>
   </body>

@@ -1,36 +1,142 @@
 const { exec } = require('child_process');
+const os = require('os');
+const fs = require('fs');
+const path = require('path');
+const key = require('./key.js');
+const start = require('./windows/start.js');
+const ykform = require('./windows/yubikey_form.js');
+const log4js = require('log4js');
+const logger = log4js.getLogger("app"); 
 
 function registerIpc(ipcMain) {
 
-    // get yubikeys
-    ipcMain.on('get-yubikeys', (event, arg) => {
+    // receive signal from UI
+    ipcMain.on('generate-key', async (event, arg) => {
 
-        // count
-        if(arg === "count") {
-            getYubikeys((count) => {
-                event.reply('keys', count)
-            })
+        event.reply('console-message', "Checking Homebrew...")
+        logger.info("Checking homebrew")
+        // check dependencies
+        var found = await ensureDependencies()
+        if(!found) {
+            event.reply('console-message', "Problems with Homebrew. Check /tmp/radix-onboard.log for more information.")
+            return;
         }
 
-        // list, map, tree
+        event.reply('console-message', "Brew found, dependencies were ensured to be installed.")
+        event.reply('console-message', "Checking if GPG available on your system is available.")
+
+        // check GPG
+        var found = await getGPG();
+        if(!found) {
+            event.reply('console-message', "GPG doesn't seem to be available on your system... Please try again.")
+            return;
+        }
+
+        event.reply('console-message', "GPG is available.")
+        event.reply('console-message', "Checking yubikey...")
+
+        // check yubikey
+        
+
+        event.reply('console-message', "Yubikey found.")
+        event.reply('console-message', "Details for the private key have been requested.")
+
+        // open form
+        ykform.createWindow(start.getWindow())
     })
-}
 
+    // yubikey form
+    ipcMain.on('yubikey-form', async (event, data) => {
 
-function getYubikeys(callback) {
-    var command = "gpg --list-secret-keys"
-    exec(command, (err, stdout, stderr) => {
-        var count = -1;
-        if (err) {
-            console.log(err)
-            callback(count)
-        }
-        else {
-            // count 'sec' word
-            count = (stdout.match(/sec/g) || []).length;
-            callback(count)
-        }
+        // generate
+        start.getWindow().send('console-message', "Generating keys, please wait.")
+        var password = await generateKeys(data.first_name + " " +data.last_name, data.email)
+        
+        // hide
+        ykform.destroyWindow()
+
+        // output
+        start.getWindow().send('console-message', "Key generated successfully!")
+        start.getWindow().send('console-message', `NOTE: Password is ${password}`)
+        start.getWindow().send('console-message', `Store it somewhere safe, it's unrecoverable!`)
     });
 }
+
+
+async function generateKeys(name, email) {
+    var password = await new Promise(resolve => {
+        fs.mkdtemp(path.join(os.tmpdir(), 'pk'), (err, folder) => {
+            if (err) {
+                err;
+            }
+
+            // 10 year expiration date
+            var years = 10
+            var expiration = new Date(new Date().setFullYear(new Date().getFullYear() + years)).toISOString().slice(0, 10);
+
+            // create master key
+            var password = key.createPrivateKey(folder, name, email, expiration)
+
+            // create subkeys
+            resolve(password)
+        });
+    });
+
+    return password;
+}
+
+async function ensureDependencies() {
+
+    // check brew
+    var pass = await new Promise(resolve => {
+        exec('HOMEBREW_NO_AUTO_UPDATE=1 brew --version', (err, stdout, stderr) => {
+            if(err) 
+                logger.error("Homebrew not found. \n" + err)
+            resolve(stdout.includes("homebrew-core"))
+        })
+    })
+
+    if(!pass)
+        return false;
+
+    // check yubikey dependencies
+    pass = await new Promise(resolve => {
+        exec('HOMEBREW_NO_AUTO_UPDATE=1 brew install gnupg hopenpgp-tools pinentry-mac', (err, stdout, stderr) => {
+            if(err)
+                logger.error("Error with dependencies. \n" + err)
+
+            // this often will give error if packages are already installed that need to be updated.
+            resolve(true)
+        })
+    })
+
+    if(!pass)
+        return false;
+
+    return true;
+}
+
+async function getYubikey() {
+    var found = await new Promise(resolve => {
+        exec('gpg --card-status', (err, stdout, stderr) => {
+            if(err)
+                logger.error(err)
+            resolve(stdout.includes("Serial number"));
+        })
+    });
+    return found
+}
+
+async function getGPG() {
+    var found = await new Promise(resolve => {
+        exec('gpgconf', (err, stdout, stderr) => {
+            if(err)
+                logger.error(err)
+            resolve(stdout.includes("gpg-agent"));
+        })
+    });
+    return found
+}
+
 
 module.exports.registerIpc = registerIpc
