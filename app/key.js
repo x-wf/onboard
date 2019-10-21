@@ -65,7 +65,7 @@ async function generatePassword() {
                 resolve(null);
             }
             else {
-                resolve(stdout);
+                resolve(stdout.trim());
             }
         })
     });
@@ -99,13 +99,38 @@ async function createKeyFile(name, email, expiration, password) {
                 }
 
                 // it prints to stderr
-                console.log(stderr)
                 if(stderr.includes("trusted")) {
-                    resolve(true);
-                    return;
+
+                    // key fingerprint
+                    var fingerprint = stderr.substring(
+                        stderr.lastIndexOf(".d/")+3, 
+                        stderr.lastIndexOf(".rev")
+                    );
+
+                    // generate subkeys
+
+                    // sign
+                    exec(`gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
+                        if(err) {
+                            logger.error(err)
+                            resolve(false);
+                            return;
+                        }
+
+                        // auth
+                        exec(`gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
+                            if(err) {
+                                logger.error(err)
+                                resolve(false);
+                                return;
+                            }
+    
+                            resolve(true);
+                        });
+                    });
                 }
-                // gpg --batch --passphrase '' --quick-add-key "47E6B1390ECFBA49" rsa4096 sign 1y
-                resolve(false);
+                else
+                    resolve(false);
             })
         });
     });
