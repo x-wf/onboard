@@ -115,7 +115,7 @@ async function ensureDependencies() {
 
     // check yubikey dependencies
     pass = await new Promise(resolve => {
-        exec('HOMEBREW_NO_AUTO_UPDATE=1 brew install gnupg hopenpgp-tools pinentry-mac', (err, stdout, stderr) => {
+        exec('HOMEBREW_NO_AUTO_UPDATE=1 brew install gnupg', (err, stdout, stderr) => {
             if(err)
                 logger.error("Error with dependencies. \n" + err)
 
