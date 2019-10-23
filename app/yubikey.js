@@ -1,4 +1,5 @@
 const { exec } = require('child_process');
+const { clipboard } = require('electron');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -7,6 +8,8 @@ const start = require('./windows/start.js');
 const ykform = require('./windows/yubikey_form.js');
 const log4js = require('log4js');
 const logger = log4js.getLogger("app"); 
+
+passphrase = "";
 
 function registerIpc(ipcMain) {
 
@@ -36,7 +39,6 @@ function registerIpc(ipcMain) {
         event.reply('console-message', "Checking yubikey...")
 
         // check yubikey
-        
 
         event.reply('console-message', "Yubikey found.")
         event.reply('console-message', "Details for the private key have been requested.")
@@ -50,15 +52,27 @@ function registerIpc(ipcMain) {
 
         // generate
         start.getWindow().send('console-message', "Generating keys, please wait.")
-        var password = await generateKeys(data.first_name + " " +data.last_name, data.email)
+        passphrase = await generateKeys(data.first_name + " " +data.last_name, data.email)
         
         // hide
         ykform.destroyWindow()
 
         // output
-        start.getWindow().send('console-message', "Key generated successfully!")
-        start.getWindow().send('console-message', `NOTE: Password is ${password}`)
-        start.getWindow().send('console-message', `Store it somewhere safe, it's unrecoverable!`)
+        start.getWindow().send('console-message', "Key generated successfully.")
+        start.getWindow().send('console-message', `NOTE: Use the Copy Passphase button to copy your passphrase somewhere safe. It's unrecoverable!`)
+
+        start.getWindow().send('passphrase-button', true)
+    });
+
+    // copy passphrase
+    ipcMain.on('passphrase-button', async (event, data) => {
+        
+        start.getWindow().send('console-message', "Passphrase copied to clipboard.")
+        clipboard.writeText(passphrase, 'selection');
+        delete passphrase;
+        
+        // disable
+        start.getWindow().send('passphrase-button', false)
     });
 }
 

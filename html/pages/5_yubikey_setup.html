@@ -19,7 +19,12 @@
             <option selected>Start by inserting an empty Yubikey and click "Create Key"</option>
         </select>
     </div>
-    <div class="console-buttons width-100 text-right" style="margin-top:20px;">
-        <button id="generate-key-button">Create Key</button>
+    <div class="width-100" style="margin-top:20px; display: flex;">
+        <div class="console-buttons width-50 text-left">
+            <button id="passphrase-button" disabled>Copy Passphrase</button>
+        </div>
+        <div class="console-buttons width-50 text-right">
+            <button id="generate-key-button">Create Key</button>
+        </div>
     </div>
 </div>

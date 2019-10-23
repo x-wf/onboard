@@ -8,16 +8,14 @@ setTimeout(function() {
         ipcRenderer.send('generate-key', null)
     });
 
-    // 
-    ipcRenderer.on('generated-key', (event, args) => {
-    
+    // copy passphrase button
+    $("#passphrase-button", $iframe.contents()).on("click", function() {
+        debugger;
+        ipcRenderer.send('passphrase-button')
     })
-    ipcRenderer.on('console-message', (event, message) => {
-        addConsoleMessage($console, message)
-    })
-    
+
     // yubikey form
-    $("#yubikey_form").submit(function(e) {
+    $("#yubikey-form").submit(function(e) {
 
         // confirm
         if(confirm("Are you sure you want to save these details?")) {
@@ -36,6 +34,16 @@ setTimeout(function() {
         var window = remote.getCurrentWindow();
         window.close();
     })
+
+    // ipcRenderer
+    ipcRenderer.on('console-message', (event, message) => {
+        addConsoleMessage($console, message)
+    })
+    ipcRenderer.on('passphrase-button', (event, enable) => {
+        var $button = $("#passphrase-button", $iframe.contents())
+        enableDomElement($button, enable)
+    })
+
 }, 1000)
 
 
@@ -48,7 +56,6 @@ function addConsoleMessage($console, message) {
     $console.scrollTop($console.scrollTop() + (optionTop - selectTop));
 }
 
-
 function getFormData($form) {
     var unindexed_array = $form.serializeArray();
     var data = {};
@@ -58,4 +65,12 @@ function getFormData($form) {
     });
 
     return data;
+}
+
+function enableDomElement($element, enable) {
+    if(enable == undefined)
+        enable = true;
+    
+    if($element)
+        $($element).prop("disabled", !enable);
 }

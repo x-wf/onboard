@@ -5,7 +5,7 @@ mac:
   gatekeeperAssess: false
   category: public.app-category.utilities
   target:
-      - target: "pkg"
+      - target: "dmg"
         arch: 
           - "x64"
 files:

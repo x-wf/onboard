@@ -6,19 +6,37 @@
   "scripts": {
     "start": "electron . --enable-transparent-visuals --disable-gpu",
     "dist": "electron-builder --config electron-builder.yml",
-    "dist:mac": "electron-builder --mac --config electron-builder.yml"
+    "dist:mac": "electron-builder --mac --config electron-builder.yml",
+    "release": "build"
   },
   "author": {
     "name": "RadixDLT",
     "email": "devops@radixdlt.com",
     "url": "https://radixdlt.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/radixdlt/radix-onboard.git"
+  },
+  "build": {
+    "appId": "com.applyhead.pingo",
+    "productName": "Pingo",
+    "copyright": "Copyright © year Sandeep Acharya",
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "type": "distribution"
+    },
+    "publish": [
+      "github"
+    ]
+  },
   "license": "ISC",
   "private": true,
   "devDependencies": {
     "electron": "^6.0.9",
     "electron-builder": "^21.2.0",
-    "electron-packager": "^14.0.6"
+    "electron-packager": "^14.0.6",
+    "electron-updater": "^4.1.2"
   },
   "dependencies": {
     "fix-path": "^2.1.0",

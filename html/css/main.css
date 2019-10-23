@@ -83,8 +83,13 @@ body {
 .index-option ul li {
 }
 
+.width-50 {
+    width:50%!important;
+    display: inline-block;
+}
 .width-100 {
     width:100%!important;
+    display: inline-block;
 }
 .text-left {
     text-align:left!important;
