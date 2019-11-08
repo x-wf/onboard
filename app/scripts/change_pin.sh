@@ -12,4 +12,8 @@ send -- "1\r"
 # default: 12345678
 expect -exact "Your selection? "
 send -- "3\r"
+
+# exit
+expect -exact "Your selection? "
+send -- "Q\r"
 expect eof
