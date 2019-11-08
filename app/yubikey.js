@@ -16,17 +16,13 @@ function registerIpc(ipcMain) {
 
     // receive signal from UI
     ipcMain.on('generate-key', async (event, arg) => {
-        event.reply('console-message', "Checking Homebrew...")
-        logger.info("Checking homebrew")
+        event.reply('console-message', "Checking dependencies, please wait.")
         // check dependencies
         var found = await ensureDependencies()
         if(!found) {
             event.reply('console-message', "Problems with Homebrew. Check /tmp/radix-onboard.log for more information.")
             return;
         }
-
-        event.reply('console-message', "Brew found, dependencies were ensured to be installed.")
-        event.reply('console-message', "Checking if GPG available on your system is available.")
 
         // check GPG
         var found = await getGPG();
@@ -35,7 +31,6 @@ function registerIpc(ipcMain) {
             return;
         }
 
-        event.reply('console-message', "GPG is available.")
         event.reply('console-message', "Checking yubikey...")
 
         // check yubikey
@@ -46,7 +41,7 @@ function registerIpc(ipcMain) {
         }
 
         event.reply('console-message', "Yubikey found.")
-        event.reply('console-message', "Details for the private key have been requested.")
+        event.reply('console-message', "Creating key...")
 
         // open form
         ykform.createWindow(start.getWindow())
@@ -59,7 +54,7 @@ function registerIpc(ipcMain) {
         ykform.enableInputs(false);
 
         // generate
-        start.getWindow().send('console-message', "Generating keys, please wait.")
+        start.getWindow().send('console-message', "Generating key, please wait.")
         createdKey = await generateKeys(data.first_name + " " +data.last_name, data.email)
         
         // enable form
@@ -67,7 +62,7 @@ function registerIpc(ipcMain) {
 
         // error creating keys
         if(createdKey == false) {
-            start.getWindow().send('console-message', "Error generating keys. Check /tmp/radix-onboard.log")
+            start.getWindow().send('console-message', "Error generating key. Check /tmp/radix-onboard.log")
             return;
         }
 
@@ -80,8 +75,6 @@ function registerIpc(ipcMain) {
 
         // output
         start.getWindow().send('console-message', "Key generated successfully.")
-        // start.getWindow().send('console-message', `NOTE: Use the Copy Passphrase button to copy your passphrase somewhere safe. It's unrecoverable!`)
-        // start.getWindow().send('enable-button', "#passphrase-button", true)
         start.getWindow().send('console-message', `Use the Copy to Yubikey button to copy the key to your yubikey.`)
         start.getWindow().send('enable-button', "#copy-to-yubikey-button", true)
     });

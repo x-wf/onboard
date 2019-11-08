@@ -17,18 +17,15 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
     if (startWindow.getWindow()) {
         if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
             startWindow.getWindow().focus()
+            startWindow.getWindow().show()
     } else {
         startWindow.createWindow(app)
     }
 })
 
 app.on('window-all-closed', () => {
-    startWindow.destroyWindow()
     if (process.platform !== 'darwin') {
         app.quit()
-    }
-    else {
-        app.dock.hide();
     }
 })
 app.on('ready', () => {

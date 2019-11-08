@@ -21,7 +21,6 @@ expect {
     }
 }
 
-# r7104cOBTkWAmDqK1M6eHQ==
 expect  "gpg>"
 send "key 1 \r"
 expect  "gpg> "

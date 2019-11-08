@@ -1,5 +1,4 @@
 const { BrowserWindow, ipcMain } = require('electron')
-const nativeImage = require('electron').nativeImage
 const yubikeys = require('../yubikey')
 const persist = require('../persist')
 const path = require('path')
@@ -45,16 +44,22 @@ function createWindow (app) {
 
         // Load page
         window.loadFile('./html/index.html')
-        window.on('closed', (event) => {
+        window.on('close', (event) => {
             // run in background
             if(!app.isQuiting){
+                window.hide();
                 event.preventDefault();
+                app.dock.hide();
             }
-            return false;
+            return false
         })
-
-        // show docker icon
-        app.dock.show();
+        window.on('show',function(event){
+            app.dock.show();
+        });
+        window.on('minimize',function(event){
+            event.preventDefault();
+            window.hide();
+        });
 
         // register IPC's here
         yubikeys.registerIpc(ipcMain)

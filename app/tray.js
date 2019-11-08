@@ -9,7 +9,7 @@ tray = null;
 
 async function createTray() {
 
-    tray = new Tray(path.join(__dirname, '../html/img/radix-icon-16x16-circle.png'))
+    tray = new Tray(path.join(__dirname, '../html/img/radix-icon-16x16-circle-transparent.png'))
     contextMenu = await generateTemplate();
 
     tray.setContextMenu(contextMenu)
@@ -21,28 +21,39 @@ async function generateTemplate() {
 
     // Yubikey
     {
-      label: `Yubikey plugged in: ${await yubikey.getYubikey() ? "Yes" : "No"}`,
-      enabled: false,
+        label: `Yubikey plugged in: ${await yubikey.getYubikey() ? "Yes" : "No"}`,
+        enabled: false,
     },
     {type: "separator"},
 
     // Help
     {
-      label: "Open Guide", click: (item, window, event) => {
-        startWindow.createWindow(app)
-      },
+        label: "Open Guide", click: (item, window, event) => {
+            if (startWindow.getWindow()) {
+            if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
+                startWindow.getWindow().focus()
+                startWindow.getWindow().show()
+            } else {
+                startWindow.createWindow(app)
+            }
+        },
     },
     {
-      label: "Help", click: (item, window, event) => {
-        childProc.exec('open -a "Google Chrome" https://radixdlt.atlassian.net/servicedesk/customer/portal/3/group/5/create/17');
-      },
+        label: "Help", click: (item, window, event) => {
+            childProc.exec('open -a "Google Chrome" https://radixdlt.atlassian.net/servicedesk/customer/portal/3/group/5/create/17');
+        },
     },
     {
-      type: "separator"
+        type: "separator"
     },
 
     // Quit
-    {role: "quit"}
+    {
+        label: 'Quit', click:  function(){
+            app.isQuiting = true;
+            app.quit();
+        }
+    }
   ])
 }
 
