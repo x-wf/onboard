@@ -1,4 +1,4 @@
-const { app } = require('electron')
+const { app, dialog } = require('electron')
 const autostart = require('./app/autostart')
 const systemTray = require('./app/tray')
 const startWindow = require('./app/windows/start')
@@ -6,19 +6,32 @@ const fixPath = require('fix-path');
 const log4js = require('log4js');
 
 
-app.on('ready', () => {
-    startApp()
-})
+   
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+    app.quit()
+    return;
+}
 
-app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-        app.quit()
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (startWindow.getWindow()) {
+        if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
+            startWindow.getWindow().focus()
+    } else {
+        startWindow.createWindow(app)
     }
 })
 
-app.on('activate', () => {
+app.on('window-all-closed', () => {
+    startWindow.destroyWindow()
+    if (process.platform !== 'darwin') {
+        app.quit()
+    }
+    else {
+        app.dock.hide();
+    }
+})
+app.on('ready', () => {
     startApp()
 })
 
@@ -26,7 +39,10 @@ app.on('activate', () => {
 function startApp() {
     fixPath();
 
+    // main window
     var window = startWindow.createWindow(app)
+ 
+    // tray
     var tray = systemTray.createTray()
     
     // logger
@@ -35,5 +51,6 @@ function startApp() {
         categories: { default: { appenders: ['app'], level: 'ERROR' } }
     });
     
-    autostart.createPlist()
+    // create autostart agent
+    autostart.createAgent()
 }

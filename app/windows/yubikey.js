@@ -3,6 +3,16 @@ const path = require('path')
 
 let window
 
+
+function enableInputs(enable) {
+
+    if(typeof enable == undefined)
+        enable = false;
+
+    if(window != undefined)
+        window.webContents.executeJavaScript("$('input,button').attr('disabled', "+!enable+");");
+}
+
 function destroyWindow() {
     if(window != undefined)
         window.close()
@@ -47,6 +57,7 @@ function createWindow (parent) {
     return window
 }
 
+module.exports.enableInputs = enableInputs
 module.exports.createWindow = createWindow
 module.exports.destroyWindow = destroyWindow
 module.exports.getWindow = getWindow

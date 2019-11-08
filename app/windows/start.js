@@ -1,7 +1,9 @@
 const { BrowserWindow, ipcMain } = require('electron')
+const nativeImage = require('electron').nativeImage
 const yubikeys = require('../yubikey')
 const persist = require('../persist')
 const path = require('path')
+const url = require('url')
 
 
 let window
@@ -18,6 +20,14 @@ function createWindow (app) {
     if (window == undefined) {
 
         // Window config
+        console.log(path.join(app.getAppPath(), 'build/icon.icns'))
+        
+        const iconUrl = url.format({
+            pathname: path.join(__dirname, '../html/img/radix-icon-16x16-circle.png'),
+            protocol: 'file:',
+            slashes: true
+        })
+
         window = new BrowserWindow({
             width: 800,
             height: 600,
@@ -26,7 +36,7 @@ function createWindow (app) {
             resizable: false,
             fullscreenWindowTitle: "true",
             vibrancy: "dark", //dark, light, appearance-based
-            icon: path.join(__dirname, '../../html/img/radix-icon.png'),
+            icon: iconUrl,
             webPreferences: {
                 nodeIntegration: true,
                 experimentalFeatures: true
@@ -42,6 +52,9 @@ function createWindow (app) {
             }
             return false;
         })
+
+        // show docker icon
+        app.dock.show();
 
         // register IPC's here
         yubikeys.registerIpc(ipcMain)

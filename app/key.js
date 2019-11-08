@@ -79,7 +79,7 @@ async function createKeyFile(name, email, expiration, password) {
     var data = pkConfig(name, email, expiration, password)
 
     // create keys
-    var success = await new Promise(resolve => {
+    var fingerprint = await new Promise(resolve => {
         tmp.file(function (err, path, fd, cleanupCallback) {
             if(err) {
                 logger.error(err)
@@ -125,7 +125,7 @@ async function createKeyFile(name, email, expiration, password) {
                                 return;
                             }
     
-                            resolve(true);
+                            resolve(fingerprint);
                         });
                     });
                 }
@@ -134,6 +134,8 @@ async function createKeyFile(name, email, expiration, password) {
             })
         });
     });
+
+    return fingerprint;
 }
 
 async function createPrivateKey(directory, name, email, expiration) {
@@ -151,12 +153,12 @@ async function createPrivateKey(directory, name, email, expiration) {
     }
 
     // key file
-    var created = await createKeyFile(name, email, expiration, password);
-    if(created == false) {
+    var fingerprint = await createKeyFile(name, email, expiration, password);
+    if(fingerprint == false) {
         return null;
     }
 
-    return password;
+    return {fingerprint: fingerprint, password: password};
 }
 
 

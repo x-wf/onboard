@@ -10,9 +10,15 @@ setTimeout(function() {
 
     // copy passphrase button
     $("#passphrase-button", $iframe.contents()).on("click", function() {
-        debugger;
         ipcRenderer.send('passphrase-button')
     })
+
+    // copy to yubikey button
+    $("#copy-to-yubikey-button", $iframe.contents()).on("click", function() {
+        ipcRenderer.send('copy-to-yubikey-button')
+    })
+
+    
 
     // yubikey form
     $("#yubikey-form").submit(function(e) {
@@ -39,8 +45,8 @@ setTimeout(function() {
     ipcRenderer.on('console-message', (event, message) => {
         addConsoleMessage($console, message)
     })
-    ipcRenderer.on('passphrase-button', (event, enable) => {
-        var $button = $("#passphrase-button", $iframe.contents())
+    ipcRenderer.on('enable-button', (event, element, enable) => {
+        var $button = $(element, $iframe.contents())
         enableDomElement($button, enable)
     })
 
