@@ -18,6 +18,11 @@ setTimeout(function() {
         ipcRenderer.send('copy-to-yubikey-button')
     })
 
+    // change yubikey pin button
+    $("#change-pin-button", $iframe.contents()).on("click", function() {
+        ipcRenderer.send('change-pin-button')
+    })
+
     
 
     // yubikey form

@@ -81,7 +81,25 @@ function registerIpc(ipcMain) {
 
         // output
         start.getWindow().send('console-message', "Key generated successfully.")
-        start.getWindow().send('console-message', `Use the Copy to Yubikey button to copy the key to your yubikey.`)
+        start.getWindow().send('console-message', `Use the Change PIN button to change the PIN of the yubikey.`)
+        start.getWindow().send('enable-button', "#change-pin-button", true)
+        // start.getWindow().send('enable-button', "#copy-to-yubikey-button", true)
+    });
+
+    // change yubikey pin
+    ipcMain.on('change-pin-button', async (event, data) => {
+
+        start.getWindow().send('console-message', "Changing yubikey pin...")
+        start.getWindow().send('enable-button', "#change-pin-button", false)
+        
+        // change
+        var changed = await changeYubikeyPin()
+        if(!changed) {
+            start.getWindow().send('console-message', "Error while changing PIN.")
+            start.getWindow().send('enable-button', "#change-pin-button", true)
+            return;
+        }
+        start.getWindow().send('console-message', "PIN changed successfully.")
         start.getWindow().send('enable-button', "#copy-to-yubikey-button", true)
     });
 
@@ -126,11 +144,8 @@ function registerIpc(ipcMain) {
     
 }
 
-
-async function moveKeyToYubikey(fingerprint) {
-    console.log("Editing key "+fingerprint)
+async function changeYubikeyPin() {
     var success = await new Promise(async resolve => {
-
         // change pin
         var script = path.join(__dirname, 'scripts/change_pin.sh')
         var changed = await new Promise(resolveChange => {
@@ -143,14 +158,20 @@ async function moveKeyToYubikey(fingerprint) {
                 resolveChange(true)
             })
         })
-
         if(!changed) {
             resolve(false)
             return;
         }
-        
+        resolve(true)
+    });
+    return success
+}
+
+async function moveKeyToYubikey(fingerprint) {
+    console.log("Editing key "+fingerprint)
+    var success = await new Promise(async resolve => {
         // move keys over
-        script = path.join(__dirname, 'scripts/move_key.sh')
+        var script = path.join(__dirname, 'scripts/move_key.sh')
         changed = await new Promise(resolveChange => {
             exec(`expect "${script}" ${fingerprint}`, function(err, stdout, stderr) {
                 if(err) {
