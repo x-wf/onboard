@@ -14,9 +14,9 @@ autoUpdater.on('update-downloaded', () => {
         startWindow.getWindow().webContents.send('update_downloaded');
 });
 
-autoUpdater.on('download-progress', (ev, progressObj) => {
+autoUpdater.on('download-progress', (progressObj) => {
     if(startWindow.getWindow())
-        startWindow.getWindow().webContents.send('download_progress', progressObj.percent);
+        startWindow.getWindow().webContents.send('download_progress', Math.round(progressObj.percent));
 })
 
 autoUpdater.on('error', message => {
@@ -30,8 +30,9 @@ function registerIpc(ipcMain) {
         event.sender.send('app_version', { version: app.getVersion() });
     });
     ipcMain.on('restart_app', () => {
-        app.quit()
+        app.isQuiting = true;
         autoUpdater.quitAndInstall();
+        app.quit();
     });
 }
 

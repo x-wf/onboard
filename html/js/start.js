@@ -16,7 +16,7 @@ $(document).ready(function(){
         ipcRenderer.removeAllListeners('app_version');
         document.title = "Guide " + arg.version;
     });
-    ipcRenderer.on('download_progress', (progress) => {
+    ipcRenderer.on('download_progress', (event, progress) => {
         message.innerText = `Downloaded ${progress}%`;
         notification.classList.remove('hidden');
     })
