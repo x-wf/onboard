@@ -38,6 +38,7 @@ setTimeout(function() {
     // yubikey close form
     $("#yk-form-close").on("click", function() {
         var window = remote.getCurrentWindow();
+        ipcRenderer.send('yubikey-form-cancel')
         window.close();
     })
 
