@@ -8,6 +8,21 @@ const url = require('url')
 
 let window
 
+autoUpdater.on('update-available', () => {
+    if(startWindow.getWindow())
+        startWindow.getWindow().webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+    if(startWindow.getWindow())
+        startWindow.getWindow().webContents.send('update_downloaded');
+});
+
+autoUpdater.on('download-progress', (ev, progressObj) => {
+    if(startWindow.getWindow())
+        startWindow.getWindow().webContents.send('download_progress', progressObj);
+})
+
 function destroyWindow() {
     window = undefined
 }
@@ -67,6 +82,10 @@ function createWindow () {
         yubikeys.registerIpc(ipcMain)
         persist.registerIpc(ipcMain)
         registerIpc(ipcMain)
+
+
+        // check updates
+        autoUpdater.checkForUpdatesAndNotify();
     }
     return window
 }

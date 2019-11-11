@@ -1,5 +1,4 @@
 const { app, dialog } = require('electron')
-const { autoUpdater } = require('electron-updater');
 const autostart = require('./app/autostart')
 const systemTray = require('./app/tray')
 const startWindow = require('./app/windows/start')
@@ -34,16 +33,6 @@ app.on('ready', () => {
     startApp(createWindow)
 })
 
-autoUpdater.on('update-available', () => {
-    if(startWindow.getWindow())
-        startWindow.getWindow().webContents.send('update_available');
-});
-
-autoUpdater.on('update-downloaded', () => {
-    if(startWindow.getWindow())
-        startWindow.getWindow().webContents.send('update_downloaded');
-});
-
 function startApp(createWindow=true) {
     fixPath();
 
@@ -63,6 +52,4 @@ function startApp(createWindow=true) {
     // create autostart agent
     autostart.createAgent()
 
-    // check updates
-    autoUpdater.checkForUpdatesAndNotify();
 }
