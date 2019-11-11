@@ -45,7 +45,9 @@ body {
     margin-bottom: 5px!important;
     color:rgb(219, 250, 219)!important;
 }
-
+.gif-box {
+    margin-top:20px; 
+}
 /* FULL HEIGHT FOR PAGE SLIDER */
 .bx-viewport, .slider, iframe, .slider div{
     height: 100%!important;
@@ -83,6 +85,14 @@ body {
 .index-option ul li {
 }
 
+.width-25 {
+    width:25%!important;
+    display: inline-block;
+}
+.width-33 {
+    width:33%!important;
+    display: inline-block;
+}
 .width-50 {
     width:50%!important;
     display: inline-block;
