@@ -30,6 +30,7 @@ function registerIpc(ipcMain) {
         event.sender.send('app_version', { version: app.getVersion() });
     });
     ipcMain.on('restart_app', () => {
+        app.quit()
         autoUpdater.quitAndInstall();
     });
 }
