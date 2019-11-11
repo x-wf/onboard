@@ -25,6 +25,8 @@ var template = `
             <string>/usr/bin/open</string>
             <string>-a</string>
             <string>Radix Onboard</string>
+            <string>--args</string>
+            <string>--no-window</string>
         </array>
         <key>StandardOutPath</key>
         <string>/tmp/radix-onboard.log</string>

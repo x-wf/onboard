@@ -29,15 +29,17 @@ app.on('window-all-closed', () => {
     }
 })
 app.on('ready', () => {
-    startApp()
+    var createWindow = !process.argv.includes("--no-window")
+    startApp(createWindow)
 })
 
 
-function startApp() {
+function startApp(createWindow=true) {
     fixPath();
 
     // main window
-    var window = startWindow.createWindow(app)
+    if(createWindow)
+        var window = startWindow.createWindow(app)
  
     // tray
     var tray = systemTray.createTray()
