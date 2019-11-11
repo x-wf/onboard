@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
-const { autoUpdater } = require('electron-updater');
+const update = require('../update');
 const yubikeys = require('../yubikey')
 const persist = require('../persist')
 const path = require('path')
@@ -8,20 +8,6 @@ const url = require('url')
 
 let window
 
-autoUpdater.on('update-available', () => {
-    if(startWindow.getWindow())
-        startWindow.getWindow().webContents.send('update_available');
-});
-
-autoUpdater.on('update-downloaded', () => {
-    if(startWindow.getWindow())
-        startWindow.getWindow().webContents.send('update_downloaded');
-});
-
-autoUpdater.on('download-progress', (ev, progressObj) => {
-    if(startWindow.getWindow())
-        startWindow.getWindow().webContents.send('download_progress', progressObj);
-})
 
 function destroyWindow() {
     window = undefined
@@ -81,24 +67,14 @@ function createWindow () {
         // register IPC's here
         yubikeys.registerIpc(ipcMain)
         persist.registerIpc(ipcMain)
-        registerIpc(ipcMain)
+        update.registerIpc(ipcMain)
 
 
         // check updates
-        autoUpdater.checkForUpdatesAndNotify();
+        update.checkForUpdates()
     }
     return window
 }
-
-function registerIpc(ipcMain) {
-    ipcMain.on('app_version', (event) => {
-        event.sender.send('app_version', { version: app.getVersion() });
-    });
-    ipcMain.on('restart_app', () => {
-        autoUpdater.quitAndInstall();
-    });
-}
-
 
 module.exports.createWindow = createWindow
 module.exports.destroyWindow = destroyWindow
