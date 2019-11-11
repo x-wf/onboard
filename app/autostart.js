@@ -1,6 +1,7 @@
-var fs = require('fs');
-var sudo = require('sudo-prompt');
+const { app } = require('electron');
 const { exec } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 const log4js = require('log4js');
 const logger = log4js.getLogger("app");
 
@@ -38,25 +39,26 @@ var template = `
 `
 
 function createAgent() {
-    var path = `/System/Library/LaunchAgents/${plist}`
+    var home = app.getPath('home');
+    var file = path.join(home, 'Library', 'LaunchAgents', plist)
 
     // write agent
     try { 
-        fs.writeFileSync(path, template, 'utf-8'); 
-        console.log(`Successfully written to ${path}`);
+        fs.writeFileSync(file, template, 'utf-8'); 
+        console.log(`Successfully written to ${file}`);
     }
     catch(error) { 
-        logger.error(`Failed write to ${path}\n` + error)
-        console.log(`Failed write to ${path}`);
+        logger.error(`Failed write to ${file}\n` + error)
+        console.log(`Failed write to ${file}`);
     }
 
     // activate agent
     console.log("Activating in launchctl")
-    exec(`launchctl load -w ${path}`, (error, stdout, stderr) => {
+    exec(`launchctl load -w ${file}`, (error, stdout, stderr) => {
         if(error) 
-            logger.error(`Unable to register in launchctl the file ${path}\n` + error)
+            logger.error(`Unable to register in launchctl the file ${file}\n` + error)
         else
-            console.log(`Successfully registered in launchctl the file ${path}.`)
+            console.log(`Successfully registered in launchctl the file ${file}.`)
     })
 }
 
