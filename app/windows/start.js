@@ -1,4 +1,5 @@
-const { BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
+const { autoUpdater } = require('electron-updater');
 const yubikeys = require('../yubikey')
 const persist = require('../persist')
 const path = require('path')
@@ -15,7 +16,7 @@ function getWindow() {
     return window
 }
 
-function createWindow (app) {
+function createWindow () {
     if (window == undefined) {
 
         // Window config
@@ -41,6 +42,7 @@ function createWindow (app) {
                 experimentalFeatures: true
             },
         })
+        window.setTitle(`Guide ${app.getVersion()}`)
 
         // Load page
         window.loadFile('./html/index.html')
@@ -64,9 +66,20 @@ function createWindow (app) {
         // register IPC's here
         yubikeys.registerIpc(ipcMain)
         persist.registerIpc(ipcMain)
+        registerIpc(ipcMain)
     }
     return window
 }
+
+function registerIpc(ipcMain) {
+    ipcMain.on('app_version', (event) => {
+        event.sender.send('app_version', { version: app.getVersion() });
+    });
+    ipcMain.on('restart_app', () => {
+        autoUpdater.quitAndInstall();
+    });
+}
+
 
 module.exports.createWindow = createWindow
 module.exports.destroyWindow = destroyWindow

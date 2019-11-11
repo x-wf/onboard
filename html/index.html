@@ -14,7 +14,31 @@
   
 
   <body class="main_body">
-    
+    <style>
+      #notification {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 200px;
+        padding: 20px;
+        border-radius: 5px;
+        background-color: white;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+    <div id="notification" class="hidden">
+      <p id="message"></p>
+      <button id="close-button" onClick="closeNotification()">
+        Close
+      </button>
+      <button id="restart-button" onClick="restartApp()" class="hidden">
+        Restart
+      </button>
+    </div>
+
     <!-- JS FILES -->
     <script>const { ipcRenderer } = require('electron');</script>
     <script>window.$ = window.jQuery = require('jquery');</script>
@@ -39,5 +63,6 @@
           <div><iframe id="personal_integrity" src="pages/7_personal_integrity.html"></iframe></div>
       </div>
     </div>
+
   </body>
 </html>

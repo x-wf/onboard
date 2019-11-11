@@ -34,7 +34,7 @@ async function generateTemplate() {
                 startWindow.getWindow().focus()
                 startWindow.getWindow().show()
             } else {
-                startWindow.createWindow(app)
+                startWindow.createWindow()
             }
         },
     },

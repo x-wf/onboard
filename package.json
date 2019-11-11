@@ -1,12 +1,13 @@
 {
   "name": "radix-onboard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "",
   "main": "main.js",
   "scripts": {
     "start": "electron . --enable-transparent-visuals --disable-gpu",
     "dist": "electron-builder --config electron-builder.yml",
     "dist:mac": "electron-builder --mac --config electron-builder.yml",
+    "deploy": "electron-builder build --mac --publish always",
     "release": "build"
   },
   "author": {
@@ -16,18 +17,18 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/radixdlt/radix-onboard.git"
+    "url": "git+git@github.com:x-wf/onboard.git"
   },
   "license": "ISC",
   "private": true,
   "devDependencies": {
     "electron": "^6.0.9",
     "electron-builder": "^21.2.0",
-    "electron-packager": "^14.0.6",
-    "electron-updater": "^4.1.2"
+    "electron-packager": "^14.0.6"
   },
   "dependencies": {
     "fix-path": "^2.1.0",
+    "electron-updater": "^4.1.2",
     "jquery": "^3.4.1",
     "log4js": "^5.2.2",
     "node-persist": "^3.0.5",

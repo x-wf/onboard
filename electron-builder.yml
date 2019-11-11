@@ -1,5 +1,7 @@
 appId: com.radixdlt.macos.radix-onboard
 productName: Radix Onboard
+publish:
+  provider: github
 mac:
   hardenedRuntime: true
   gatekeeperAssess: false
