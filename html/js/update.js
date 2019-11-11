@@ -1,6 +1,7 @@
 const notification = document.getElementById('notification');
 const message = document.getElementById('message');
 const restartButton = document.getElementById('restart-button');
+const closeButton = document.getElementById('close-button');
 var progressbar;
 
 $(document).ready(function(){
@@ -20,6 +21,8 @@ $(document).ready(function(){
         message.innerText = ``;
         progressbar.animate(progress/100);
         notification.classList.remove('hidden');
+        restartButton.classList.add('hidden');
+        closeButton.classList.add('hidden');
     })
     
     ipcRenderer.on('update_available', () => {
@@ -32,6 +35,7 @@ $(document).ready(function(){
         showProgressbar(false)
         message.innerText = 'Update downloaded. It will be installed on restart. Would you like to restart?';
         restartButton.classList.remove('hidden');
+        closeButton.classList.remove('hidden');
         notification.classList.remove('hidden');
     });
 

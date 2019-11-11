@@ -5,8 +5,9 @@ const log4js = require('log4js');
 const logger = log4js.getLogger("app"); 
 
 autoUpdater.on('update-available', () => {
-    if(startWindow.getWindow())
+    if(startWindow.getWindow()) {
         startWindow.getWindow().webContents.send('update_available');
+    }
 });
 
 autoUpdater.on('update-downloaded', () => {

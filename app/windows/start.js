@@ -17,6 +17,16 @@ function getWindow() {
     return window
 }
 
+function restoreWindow() {
+    if (startWindow.getWindow()) {
+        if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
+        startWindow.getWindow().focus()
+        startWindow.getWindow().show()
+    } else {
+        startWindow.createWindow()
+    }
+}
+
 function createWindow () {
     if (window == undefined) {
 
@@ -77,5 +87,6 @@ function createWindow () {
 }
 
 module.exports.createWindow = createWindow
+module.exports.restoreWindow = restoreWindow
 module.exports.destroyWindow = destroyWindow
 module.exports.getWindow = getWindow

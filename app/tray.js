@@ -2,6 +2,7 @@ const {app, Menu, Tray} = require('electron')
 const childProc = require('child_process');
 const path = require('path')
 const yubikey = require('./yubikey.js');
+const update = require('./update.js');
 const startWindow = require('./windows/start.js');
 
 
@@ -29,13 +30,7 @@ async function generateTemplate() {
     // Help
     {
         label: "Open Guide", click: (item, window, event) => {
-            if (startWindow.getWindow()) {
-            if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
-                startWindow.getWindow().focus()
-                startWindow.getWindow().show()
-            } else {
-                startWindow.createWindow()
-            }
+            startWindow.restoreWindow()
         },
     },
     {
@@ -49,6 +44,12 @@ async function generateTemplate() {
 
     // Quit
     {
+        label: 'Check for Updates', click:  function(){
+            startWindow.restoreWindow()
+            update.checkForUpdates()
+        }
+    },
+    {
         label: 'Quit', click:  function(){
             app.isQuiting = true;
             app.quit();
@@ -56,5 +57,6 @@ async function generateTemplate() {
     }
   ])
 }
+
 
 module.exports.createTray = createTray
