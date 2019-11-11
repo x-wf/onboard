@@ -7,7 +7,6 @@
 Install yarn
 `brew install yarn`
 
-
 Install dependencies:
 `yarn install`
 
@@ -25,10 +24,9 @@ https://radixdlt.atlassian.net/wiki/spaces/RR/pages/526778397/Radix+Desktop+Wall
 You can then run
 `yarn dist`
 
-You can now find the `mac/Radix Onboard.app` under `dist`
+You can now find the `mac/Radix Onboard.dmb` under `dist`
 
+To update on Github run
+`yarn deploy`
 
-# Code Signing
-
-Follow this documentation in case you need to code-sign the app:
-https://radixdlt.atlassian.net/wiki/spaces/RR/pages/526778397/Radix+Desktop+Wallet
+PS: You need to create a Github Access token and set it with `GH_TOKEN` environment variable.

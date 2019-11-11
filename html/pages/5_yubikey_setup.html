@@ -1,0 +1,34 @@
+<!-- CSS -->
+<link rel="stylesheet" href="../css/main.css">
+
+<!-- LOGO  -->
+<div class="header">
+    <!-- TITLE -->
+    <h1 class="page-title">3.6 - Yubikey Setup</h1>
+
+    <p class="page-description text-justify">
+        Please make sure you have the following available on your system:
+
+        <ul class="page-description-list text-left">
+            <li>Homebrew: <a href="#">https://brew.sh/</a></li>
+        </ul>
+    </p>
+
+    <div class="width-100">
+        <select id="yubikey-console" class="console-box width-100" size="15">
+            <option selected>By creating a key, the program will generate a private key and a passphrase for the key.</option>
+            <option selected>After generating the key, you will be able to store the private key on your Yubikey.</option>
+            <option selected>When you start to move the key, you will be prompted to change the default pin and admin pin.</option>
+            <option selected>Start by inserting a blank Yubikey into your Macbook, and press "Create Key".</option>
+        </select>
+    </div>
+    <div class="width-100 gif-box" style="display: flex;">
+        <div class="console-buttons width-50 text-left">
+            <button id="copy-to-yubikey-button" disabled>Copy to Yubikey</button>
+            <button id="passphrase-button" disabled>Copy Passphrase</button>
+        </div>
+        <div class="console-buttons width-50 text-right">
+            <button id="generate-key-button">Create Key</button>
+        </div>
+    </div>
+</div>

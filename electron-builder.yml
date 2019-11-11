@@ -1,11 +1,16 @@
 appId: com.radixdlt.macos.radix-onboard
 productName: Radix Onboard
+publish:
+  provider: github
 mac:
   hardenedRuntime: true
   gatekeeperAssess: false
   category: public.app-category.utilities
   target:
-      - target: "pkg"
+      - target: "dmg"
+        arch: 
+          - "x64"
+      - target: "zip"
         arch: 
           - "x64"
 files:

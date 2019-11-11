@@ -1,29 +1,55 @@
-const { app } = require('electron')
+const { app, dialog } = require('electron')
 const autostart = require('./app/autostart')
 const systemTray = require('./app/tray')
-const startWindow = require('./app/start')
+const startWindow = require('./app/windows/start')
+const fixPath = require('fix-path');
+const log4js = require('log4js');
 
 
-app.on('ready', () => {
-    startApp()
+   
+const gotTheLock = app.requestSingleInstanceLock()
+if (!gotTheLock) {
+    app.quit()
+    return;
+}
+
+app.on('second-instance', (event, commandLine, workingDirectory) => {
+    if (startWindow.getWindow()) {
+        if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
+            startWindow.getWindow().focus()
+            startWindow.getWindow().show()
+    } else {
+        startWindow.createWindow(app)
+    }
 })
 
 app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
         app.quit()
     }
 })
-
-app.on('activate', () => {
-    startApp()
+app.on('ready', () => {
+    var createWindow = !process.argv.includes("--no-window")
+    startApp(createWindow)
 })
 
+function startApp(createWindow=true) {
+    fixPath();
 
-function startApp() {
-    var window = startWindow.createWindow(app)
+    // main window
+    if(createWindow)
+        var window = startWindow.createWindow(app)
+ 
+    // tray
     var tray = systemTray.createTray()
     
-    autostart.createPlist()
+    // logger
+    log4js.configure({
+        appenders: { app: {type: 'file', filename: '/tmp/radix-onboard.log' } },
+        categories: { default: { appenders: ['app'], level: 'ERROR' } }
+    });
+    
+    // create autostart agent
+    autostart.createAgent()
+
 }

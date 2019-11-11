@@ -1,5 +1,10 @@
+var slider;
+
 $(document).ready(function(){
-    $('.slider').bxSlider({
+
+    // Instanciate the "skeleton" for the pages to slide
+    slider = $('.slider').bxSlider({
         infiniteLoop: false,
     });
+ 
 });
