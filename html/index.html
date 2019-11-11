@@ -9,28 +9,16 @@
     <!-- CSS FILES -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/update.css">
     <link rel="stylesheet" href="css/scrollbar.css">
   </head>
   
 
   <body class="main_body">
-    <style>
-      #notification {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        width: 200px;
-        padding: 20px;
-        border-radius: 5px;
-        background-color: white;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-      }
-      .hidden {
-        display: none;
-      }
-    </style>
+    <!-- UPDATER -->
     <div id="notification" class="hidden">
       <p id="message"></p>
+      <div id="update_progressbar" class="hidden"></div>
       <button id="close-button" onClick="closeNotification()">
         Close
       </button>
@@ -41,10 +29,12 @@
 
     <!-- JS FILES -->
     <script>const { ipcRenderer } = require('electron');</script>
+    <script>const ProgressBar = require('progressbar.js');</script>
     <script>window.$ = window.jQuery = require('jquery');</script>
     <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
     <script src="js/index.js"></script>
     <script src="js/start.js"></script>
+    <script src="js/update.js"></script>
     <script src="js/yubikey.js"></script>
 
     <!-- Slider main container -->
