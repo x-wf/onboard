@@ -18,7 +18,9 @@
     <!-- UPDATER -->
     <div id="notification" class="hidden">
       <p id="message"></p>
-      <div id="update_progressbar" class="hidden"></div>
+      <div id="progress-bar" class="hidden">
+          <div id="inner-progress-bar">10%</div>
+        </div>
       <button id="close-button" onClick="closeNotification()">
         Close
       </button>
@@ -29,7 +31,6 @@
 
     <!-- JS FILES -->
     <script>const { ipcRenderer } = require('electron');</script>
-    <script>const ProgressBar = require('progressbar.js');</script>
     <script>window.$ = window.jQuery = require('jquery');</script>
     <script src="https://cdn.jsdelivr.net/bxslider/4.2.12/jquery.bxslider.min.js"></script>
     <script src="js/index.js"></script>

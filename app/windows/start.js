@@ -18,12 +18,12 @@ function getWindow() {
 }
 
 function restoreWindow() {
-    if (startWindow.getWindow()) {
-        if (startWindow.getWindow().isMinimized()) startWindow.getWindow().restore()
-        startWindow.getWindow().focus()
-        startWindow.getWindow().show()
+    if (window) {
+        if (window.isMinimized()) window.restore()
+        window.focus()
+        window.show()
     } else {
-        startWindow.createWindow()
+        createWindow()
     }
 }
 
@@ -43,8 +43,8 @@ function createWindow () {
             width: 800,
             height: 600,
             frame: true,
-            maximizable: false,
-            resizable: false,
+            maximizable: true,
+            resizable: true,
             fullscreenWindowTitle: "true",
             vibrancy: "dark", //dark, light, appearance-based
             icon: iconUrl,

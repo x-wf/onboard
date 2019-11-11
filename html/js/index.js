@@ -7,7 +7,7 @@ setTimeout(function() {
     // On refresh yubikeys
     $(".index-option", $iframe.contents()).on("click", function() {
         console.log(".index-option clicked")
-        slider.goToSlide($(this).index());
+        slider.goToSlide($(this).index()+2);
     });
 
     // Pre-load
