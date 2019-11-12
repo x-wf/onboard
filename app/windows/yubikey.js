@@ -24,7 +24,7 @@ function getWindow() {
     return window
 }
 
-function createWindow (parent) {
+function createWindow (parent, details) {
     if (window == undefined) {
 
         // Window config
@@ -51,7 +51,10 @@ function createWindow (parent) {
         window.on('closed', () => {
             window = undefined
         })
-
+        // Provision
+        window.webContents.on('did-finish-load', function() {
+            setTimeout(()=>{window.webContents.send("user-details", details)}, 900)
+        })
         // register IPC's here
     }
     return window

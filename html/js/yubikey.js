@@ -61,6 +61,16 @@ setTimeout(function() {
     ipcRenderer.on('activate-light', (event, light) => {
         activateLight(light)
     })
+    // provision with first and last name
+    ipcRenderer.on('user-details', (event, details) => {
+        if('firstName' in details)
+            $("#first_name").val(details.firstName)
+        if('lastName' in details)
+            $("#last_name").val(details.lastName)
+        if('email' in details)
+            $("#email").val(details.email)
+        console.log(details)
+    })
     
 
     // zero-based index 
