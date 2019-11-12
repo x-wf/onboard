@@ -49,7 +49,17 @@ function registerIpc(ipcMain) {
         event.reply('console-message', "Creating key...")
 
         // open form
-        ykform.createWindow(start.getWindow())
+        var names = await getFullUsername()
+        var details = {}
+        if(names) {
+            names = names.split(' ')
+            if(names > 0) {
+                details.firstName = names[0]
+                details.lastName = names[1]
+                details.email = `${names[0].toLowerCase()}@radixdlt.com`
+            }
+        }
+        ykform.createWindow(start.getWindow(), details)
     })
 
     // yubikey form
@@ -303,6 +313,20 @@ async function getGPG() {
     return found
 }
 
+// returns e.g.: John Smith
+async function getFullUsername() {
+    var name = new Promise(resolve => {
+        exec("finger $(whoami) | egrep -o 'Name: [a-zA-Z0-9 ]{1,}' | cut -d ':' -f 2 | xargs echo", function(err, stdout, stderr) {
+            if(err) {
+                resolve(null)
+                return;
+            }
+            var name = stdout.trim();
+            resolve(name)
+        })
+    })
+    return name
+}
 
 module.exports.registerIpc = registerIpc
 module.exports.getYubikey = getYubikey
