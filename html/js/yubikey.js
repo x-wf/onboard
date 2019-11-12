@@ -3,6 +3,8 @@ setTimeout(function() {
     var $iframe = $('#yubikey_setup');
     var $console = $("#yubikey-console", $iframe.contents());
 
+    activateLight(0);
+
     // On refresh yubikeys
     $("#generate-key-button", $iframe.contents()).on("click", function() {
         ipcRenderer.send('generate-key', null)
@@ -18,7 +20,12 @@ setTimeout(function() {
         ipcRenderer.send('copy-to-yubikey-button')
     })
 
-    
+    // change yubikey pin button
+    $("#change-pin-button", $iframe.contents()).on("click", function() {
+        ipcRenderer.send('change-pin-button')
+    })
+
+
 
     // yubikey form
     $("#yubikey-form").submit(function(e) {
@@ -38,6 +45,7 @@ setTimeout(function() {
     // yubikey close form
     $("#yk-form-close").on("click", function() {
         var window = remote.getCurrentWindow();
+        ipcRenderer.send('yubikey-form-cancel')
         window.close();
     })
 
@@ -49,7 +57,26 @@ setTimeout(function() {
         var $button = $(element, $iframe.contents())
         enableDomElement($button, enable)
     })
+    // activate light
+    ipcRenderer.on('activate-light', (event, light) => {
+        activateLight(light)
+    })
+    
 
+    // zero-based index 
+    function activateLight(light) {
+        $(".console-button-signal", $iframe.contents()).each(function(index, element) {
+            if(index < light)
+                $(element).css({'opacity':'0.3'})
+            else
+                $(element).css({'opacity':'1'})
+
+            if(index != light)
+                $(element).css({'background-color':'transparent'})
+            else
+                $(element).css({'background-color':'rgb(120, 211, 120)'})
+        })
+    }
 }, 1000)
 
 

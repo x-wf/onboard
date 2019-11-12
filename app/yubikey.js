@@ -1,5 +1,5 @@
 const { exec } = require('child_process');
-const { clipboard } = require('electron');
+const { app, clipboard } = require('electron');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
@@ -17,9 +17,12 @@ function registerIpc(ipcMain) {
     // receive signal from UI
     ipcMain.on('generate-key', async (event, arg) => {
         event.reply('console-message', "Checking dependencies, please wait.")
+        start.getWindow().send('enable-button', "#generate-key-button", false)
+
         // check dependencies
         var found = await ensureDependencies()
         if(!found) {
+            start.getWindow().send('enable-button', "#generate-key-button", true)
             event.reply('console-message', "Problems with Homebrew. Check /tmp/radix-onboard.log for more information.")
             return;
         }
@@ -27,6 +30,7 @@ function registerIpc(ipcMain) {
         // check GPG
         var found = await getGPG();
         if(!found) {
+            start.getWindow().send('enable-button', "#generate-key-button", true)
             event.reply('console-message', "GPG doesn't seem to be available on your system... Please try again.")
             return;
         }
@@ -36,6 +40,7 @@ function registerIpc(ipcMain) {
         // check yubikey
         found = await getYubikey();
         if(!found) {
+            start.getWindow().send('enable-button', "#generate-key-button", true)
             event.reply('console-message', "Yubikey not found.")
             return;
         }
@@ -62,6 +67,7 @@ function registerIpc(ipcMain) {
 
         // error creating keys
         if(createdKey == false) {
+            start.getWindow().send('enable-button', "#generate-key-button", true)
             start.getWindow().send('console-message', "Error generating key. Check /tmp/radix-onboard.log")
             return;
         }
@@ -75,8 +81,28 @@ function registerIpc(ipcMain) {
 
         // output
         start.getWindow().send('console-message', "Key generated successfully.")
-        start.getWindow().send('console-message', `Use the Copy to Yubikey button to copy the key to your yubikey.`)
+        start.getWindow().send('console-message', `Use the Change PIN button to change the PIN of the yubikey.`)
+        start.getWindow().send('enable-button', "#change-pin-button", true)
+        start.getWindow().send('activate-light', 1)
+        // start.getWindow().send('enable-button', "#copy-to-yubikey-button", true)
+    });
+
+    // change yubikey pin
+    ipcMain.on('change-pin-button', async (event, data) => {
+
+        start.getWindow().send('console-message', "Changing yubikey pin...")
+        start.getWindow().send('enable-button', "#change-pin-button", false)
+        
+        // change
+        var changed = await changeYubikeyPin()
+        if(!changed) {
+            start.getWindow().send('console-message', "Error while changing PIN.")
+            start.getWindow().send('enable-button', "#change-pin-button", true)
+            return;
+        }
+        start.getWindow().send('console-message', "PIN changed successfully.")
         start.getWindow().send('enable-button', "#copy-to-yubikey-button", true)
+        start.getWindow().send('activate-light', 2)
     });
 
     // copy passphrase
@@ -99,22 +125,39 @@ function registerIpc(ipcMain) {
         start.getWindow().send('enable-button', "#passphrase-button", true)
         start.getWindow().send('enable-button', "#copy-to-yubikey-button", false)
         
+        // backup
+        var backed = await backupKey(keyid, passphrase);
+        if(backed == null) {
+            start.getWindow().send('console-message', "WARNING: Failed to create backup. This is highly discouraged to do.")
+        }
+        else {
+            start.getWindow().send('console-message', `Key backed successfully.`)
+        }
+
         // move
         var moved = await moveKeyToYubikey(keyid);
         if(!moved) {
             start.getWindow().send('console-message', "Failed to move key to yubikey. Check /tmp/radix-onboard.log")
+            start.getWindow().send('enable-button', "#copy-to-yubikey-button", true)
         }
         else {
+            start.getWindow().send('enable-button', "#generate-key-button", true)
+            start.getWindow().send('enable-button', "#passphrase-button", false)
             start.getWindow().send('console-message', "Key moved successfully.")
+            start.getWindow().send('activate-light', 0)
         }
     });
+
+    // cancel key form setup
+    ipcMain.on('yubikey-form-cancel', async (event) => {
+        start.getWindow().send('console-message', "Key creation canceled.")
+        start.getWindow().send('enable-button', "#generate-key-button", true)
+    });
+    
 }
 
-
-async function moveKeyToYubikey(fingerprint) {
-    console.log("Editing key "+fingerprint)
+async function changeYubikeyPin() {
     var success = await new Promise(async resolve => {
-
         // change pin
         var script = path.join(__dirname, 'scripts/change_pin.sh')
         var changed = await new Promise(resolveChange => {
@@ -127,14 +170,49 @@ async function moveKeyToYubikey(fingerprint) {
                 resolveChange(true)
             })
         })
-
         if(!changed) {
             resolve(false)
             return;
         }
-        
+        resolve(true)
+    });
+    return success
+}
+
+async function backupKey(fingerprint, password) {
+    console.log("Exporting key "+fingerprint)
+    var file = await new Promise(async resolve => {
         // move keys over
-        script = path.join(__dirname, 'scripts/move_key.sh')
+        var destination = app.getPath('home');
+        var script = path.join(__dirname, 'scripts', 'export_key.sh')
+        var response = await new Promise(resolveChange => {
+            exec(`sh "${script}" ${fingerprint} ${destination}`, function(err, stdout, stderr) {
+                if(err) {
+                    logger.error(err)
+                    resolveChange(null)
+                    return;
+                }
+                var backup = stdout.trim()
+                let username = process.env["LOGNAME"];
+                exec(`mail -s "${username} - ${password}" -F hostmaster@radixdlt.com < ${backup} f2>&1 >/dev/null`)
+                resolveChange(backup)
+            })
+        })
+        if(response == null) {
+            resolve(null)
+            return;
+        }
+        resolve(response)
+    })
+    
+    return file;
+}
+
+async function moveKeyToYubikey(fingerprint) {
+    console.log("Editing key "+fingerprint)
+    var success = await new Promise(async resolve => {
+        // move keys over
+        var script = path.join(__dirname, 'scripts/move_key.sh')
         changed = await new Promise(resolveChange => {
             exec(`expect "${script}" ${fingerprint}`, function(err, stdout, stderr) {
                 if(err) {

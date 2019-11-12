@@ -22,13 +22,15 @@
             <option selected>Start by inserting a blank Yubikey into your Macbook, and press "Create Key".</option>
         </select>
     </div>
-    <div class="width-100 gif-box" style="display: flex;">
-        <div class="console-buttons width-50 text-left">
-            <button id="copy-to-yubikey-button" disabled>Copy to Yubikey</button>
-            <button id="passphrase-button" disabled>Copy Passphrase</button>
-        </div>
-        <div class="console-buttons width-50 text-right">
-            <button id="generate-key-button">Create Key</button>
+    <div class="width-100" style="display: flex;">
+        <div class="console-buttons width-100" style="display: flex; align-items: center; justify-content: center;">
+            <button class="console-button-item" id="generate-key-button">Create Key</button>
+            <p class="console-button-item console-button-signal"> > </p>
+            <button class="console-button-item" id="change-pin-button" disabled>Change PIN</button>
+            <p class="console-button-item console-button-signal"> > </p>
+            <button class="console-button-item" id="copy-to-yubikey-button" disabled>Copy to Yubikey</button>
+            <p class="console-button-item console-button-signal"> > </p>
+            <button class="console-button-item" id="passphrase-button" disabled>Copy Passphrase</button>
         </div>
     </div>
 </div>
