@@ -67,14 +67,9 @@ setTimeout(function() {
     function activateLight(light) {
         $(".console-button-signal", $iframe.contents()).each(function(index, element) {
             if(index < light)
-                $(element).css({'opacity':'0.3'})
+                $(element).css({'color':'gray'})
             else
-                $(element).css({'opacity':'1'})
-
-            if(index != light)
-                $(element).css({'background-color':'transparent'})
-            else
-                $(element).css({'background-color':'rgb(120, 211, 120)'})
+                $(element).css({'color':'white'})
         })
     }
 }, 1000)
