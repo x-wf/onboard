@@ -25,6 +25,18 @@ setTimeout(function() {
         })
     });
 
+    var sliding = false
+    for(var button = 0; button < 10; button++) {
+        const val = button;
+        Mousetrap.bind(`${val}`, function() { 
+            if(sliding)
+                return;
+            slider.goToSlide(val-1); 
+            sliding = true
+            setTimeout(function(){sliding = false}, 650)
+        });
+    }
+
     // Pre-load
 }, 1000)
 
