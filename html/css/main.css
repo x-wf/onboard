@@ -117,3 +117,20 @@ body {
 .capitalize {
     text-transform: capitalize!important;
 }
+.console-button-item:not(:last-child) {
+    margin-right:10px;
+}
+.console-button-signal {
+    background-color: transparent;
+    border-radius: 50%;
+    width: 23px;
+    text-align: center;
+    padding-left: 1px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    color: white;
+    font-weight: bold;
+}
+.console-button-item:not(:last-child) {
+    margin-right:10px;
+}
