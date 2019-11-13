@@ -4,6 +4,7 @@ const yubikeys = require('../yubikey')
 const persist = require('../persist')
 const path = require('path')
 const url = require('url')
+const key = require('../key')
 
 
 let window
@@ -27,7 +28,7 @@ function restoreWindow() {
     }
 }
 
-function createWindow () {
+async function createWindow () {
     if (window == undefined) {
 
         // Window config
@@ -78,7 +79,9 @@ function createWindow () {
         yubikeys.registerIpc(ipcMain)
         persist.registerIpc(ipcMain)
         update.registerIpc(ipcMain)
-
+        
+        var importedKeys = await key.importDefaultKeys()
+        console.log(`Imported ${importedKeys} keys.`)
 
         // check updates
         update.checkForUpdates()

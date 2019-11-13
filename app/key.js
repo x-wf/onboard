@@ -3,8 +3,15 @@ const fs = require('fs')
 const tmp = require('tmp');
 const path = require('path');
 const log4js = require('log4js');
+const yubikey = require('./yubikey');
 const logger = log4js.getLogger('app'); 
 const compile = require("string-template/compile")
+
+let defaultKeys = [
+    "https://keybase.io/jamesrdx/pgp_keys.asc",
+    "https://keybase.io/zalan/pgp_keys.asc",
+    "https://keybase.io/radix_sophie/pgp_keys.asc"
+]
 
 let gpgConfig = `
     personal-cipher-preferences AES256 AES192 AES
@@ -59,7 +66,7 @@ async function createConfig(directory) {
 async function generatePassword() {
     
     var password = await new Promise(resolve => {
-        exec('gpg --gen-random -a 0 16', (err, stdout, stderr) => {
+        exec(`${yubikey.getCommandPrefix()}gpg --gen-random -a 0 16`, (err, stdout, stderr) => {
             if(err) {
                 logger.error(err)
                 resolve(null);
@@ -91,7 +98,7 @@ async function createKeyFile(name, email, expiration, password) {
             fs.writeFileSync(path, data)
 
             // generate master key
-            exec(`gpg --batch --generate-key ${path}`, (err, stdout, stderr) => {
+            exec(`${yubikey.getCommandPrefix()}gpg --batch --generate-key ${path}`, (err, stdout, stderr) => {
                 if(err) {
                     logger.error(err)
                     resolve(false);
@@ -110,7 +117,7 @@ async function createKeyFile(name, email, expiration, password) {
                     // generate subkeys
 
                     // sign
-                    exec(`gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
+                    exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
                         if(err) {
                             logger.error(err)
                             resolve(false);
@@ -118,7 +125,7 @@ async function createKeyFile(name, email, expiration, password) {
                         }
 
                         // auth
-                        exec(`gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
+                        exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
                             if(err) {
                                 logger.error(err)
                                 resolve(false);
@@ -161,5 +168,24 @@ async function createPrivateKey(directory, name, email, expiration) {
     return {fingerprint: fingerprint, password: password};
 }
 
+async function importDefaultKeys() {
+    var count = 0;
+    defaultKeys.forEach(function(key) {
+        var imported = new Promise(resolve => {
+            exec(`curl ${key} | gpg --import`, (err, stdout, stderr) => {
+                if(err) {
+                    logger.error(`Error importing ${key} \n${err}`)
+                    resolve(false)
+                    return;
+                }
+                resolve(stdout.includes("processed"))
+            });
+        })
+        if(imported)
+            count++
+    })
+    return count
+}
 
+module.exports.importDefaultKeys = importDefaultKeys
 module.exports.createPrivateKey = createPrivateKey

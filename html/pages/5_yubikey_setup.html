@@ -6,14 +6,6 @@
     <!-- TITLE -->
     <h1 class="page-title">3.6 - Yubikey Setup</h1>
 
-    <p class="page-description text-justify">
-        Please make sure you have the following available on your system:
-
-        <ul class="page-description-list text-left">
-            <li>Homebrew: <a href="#">https://brew.sh/</a></li>
-        </ul>
-    </p>
-
     <div class="width-100">
         <select id="yubikey-console" class="console-box width-100" size="15">
             <option selected>By creating a key, the program will generate a private key and a passphrase for the key.</option>
@@ -24,13 +16,13 @@
     </div>
     <div class="width-100" style="display: flex;">
         <div class="console-buttons width-100" style="display: flex; align-items: center; justify-content: center;">
-            <button class="console-button-item" id="generate-key-button">Create Key</button>
+            <button class="console-button-item console-button" id="generate-key-button">Create Key</button>
             <p class="console-button-item console-button-signal"> > </p>
-            <button class="console-button-item" id="change-pin-button" disabled>Change PIN</button>
+            <button class="console-button-item console-button" id="change-pin-button" disabled>Change PIN</button>
             <p class="console-button-item console-button-signal"> > </p>
-            <button class="console-button-item" id="copy-to-yubikey-button" disabled>Copy to Yubikey</button>
+            <button class="console-button-item console-button" id="copy-to-yubikey-button" disabled>Copy to Yubikey</button>
             <p class="console-button-item console-button-signal"> > </p>
-            <button class="console-button-item" id="passphrase-button" disabled>Copy Passphrase</button>
+            <button class="console-button-item console-button" id="passphrase-button" disabled>Copy Passphrase</button>
         </div>
     </div>
 </div>
