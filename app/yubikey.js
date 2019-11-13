@@ -9,6 +9,9 @@ const ykform = require('./windows/yubikey.js');
 const log4js = require('log4js');
 const logger = log4js.getLogger("app"); 
 
+var use_local_brew = false;
+var command_prefix = '';
+
 keyid = "";
 passphrase = "";
 
@@ -28,7 +31,7 @@ function registerIpc(ipcMain) {
         }
 
         // check GPG
-        var found = await getGPG();
+        found = await getGPG();
         if(!found) {
             start.getWindow().send('enable-button', "#generate-key-button", true)
             event.reply('console-message', "GPG doesn't seem to be available on your system... Please try again.")
@@ -264,36 +267,104 @@ async function ensureDependencies() {
 
     // check brew
     var pass = await new Promise(resolve => {
-        exec('HOMEBREW_NO_AUTO_UPDATE=1 brew --version', (err, stdout, stderr) => {
-            if(err) 
-                logger.error("Homebrew not found. \n" + err)
+        exec(`HOMEBREW_NO_AUTO_UPDATE=1 ${command_prefix}brew --version`, async (err, stdout, stderr) => {
+            if(err) {
+                logger.error("Homebrew not found. Attempting to install locally. \n" + err)
+                command_prefix = path.join(app.getPath('home'), "homebrew", "bin", path.sep)
+                use_local_brew = true
+
+                var installed = await installBrew();
+                resolve(installed)
+            }
             resolve(stdout.includes("homebrew-core"))
         })
     })
 
     if(!pass)
         return false;
+    // check gpg
+    var gpgInstalled = await new Promise(resolve => {
+        exec(`HOMEBREW_NO_AUTO_UPDATE=1 ${command_prefix}brew list`, (err, stdout, stderr) => {
+            if(err) {
+                logger.error("Error checking gnupg. \n" + err)
+            }
+            if(!stdout.includes('gnupg')) {
+                resolve(false)
+                return;
+            }
+            resolve(true);
+        })
+    })
+    if(!gpgInstalled)
+        start.getWindow().webContents.send("console-message", "Downloading and installing gpg, this may take several minutes.")
 
-    // check yubikey dependencies
-    pass = await new Promise(resolve => {
-        exec('HOMEBREW_NO_AUTO_UPDATE=1 brew install gnupg', (err, stdout, stderr) => {
-            if(err)
+    // install dependencies
+    var installed = await new Promise(resolve => {
+        exec(`HOMEBREW_NO_AUTO_UPDATE=1 ${command_prefix}brew install gnupg pinentry-mac`, (err, stdout, stderr) => {
+            if(err) 
                 logger.error("Error with dependencies. \n" + err)
 
             // this often will give error if packages are already installed that need to be updated.
+            console.log("finished installing gnupg and pinentry-mac")
+            console.log(stdout)
             resolve(true)
         })
-    })
+    });
+    // configure pinentry-mac
+    // first we get gpg to write to ~/.gnupg
+    installed = await new Promise(resolve => {
+        exec(`${command_prefix}gpg --version`, (err, stdout, stderr) => {
+            if(err) {
+                logger.error("Error with gpg. \n" + err)
+                resolve(false)
+                return;
+            }
+            resolve(stdout.includes('.gnupg'))
+        })
+    });
 
-    if(!pass)
-        return false;
+    if(!gpgInstalled) {
+        configured = await new Promise(resolve => {
+            var home = app.getPath('home')
+            var config = path.join(home, path.sep, ".gnupg", path.sep, "gpg-agent.conf")
+            var pinentry = ""
+            if(use_local_brew) 
+                pinentry = command_prefix
+            else 
+                pinentry = path.join('usr', 'local', 'bin', path.sep)
+    
+            // config pinentry-mac
+            exec(`grep -qxF 'pinentry-program ${pinentry}pinentry-mac' ${config} || echo '\npinentry-program ${pinentry}pinentry-mac' >> ${config}`, function(err, stdout, stderr) {
+                if(err) {
+                    logger.error("Error with updating gpg-agent.conf. \n" + err)
+                    resolve(false)
+                    return;
+                }
+                resolve(true)
+            })
+        });
 
+        // if pinentry-mac has been successfully changed
+        if(configured) {
+            // restart agent
+            var restarted = await new Promise(resolve=>{
+                exec(`${command_prefix}gpgconf --kill gpg-agent && ${command_prefix}gpgconf --launch gpg-agent`, function(err, stdout, stderr) {
+                    if(err) {
+                        logger.error("Error restarting the gpg-agent. \n" + err)
+                        resolve(false)
+                        return;
+                    }
+                    resolve(true)
+                })
+            })
+        }
+    }
     return true;
 }
 
 async function getYubikey() {
-    var found = await new Promise(resolve => {
-        exec('gpg --card-status', (err, stdout, stderr) => {
+    var found = new Promise(resolve => {
+        exec(`${command_prefix}gpg --card-status`, (err, stdout, stderr) => {
             if(err)
                 logger.error(err)
             resolve(stdout.includes("Serial number"));
@@ -303,8 +374,8 @@ async function getYubikey() {
 }
 
 async function getGPG() {
-    var found = await new Promise(resolve => {
-        exec('gpgconf', (err, stdout, stderr) => {
+    var found = new Promise(resolve => {
+        exec(`${command_prefix}gpgconf`, (err, stdout, stderr) => {
             if(err)
                 logger.error(err)
             resolve(stdout.includes("gpg-agent"));
@@ -322,11 +393,44 @@ async function getFullUsername() {
                 return;
             }
             var name = stdout.trim();
-            resolve(name)
+            resolve(name);
         })
     })
     return name
 }
 
+async function installBrew() {
+    var installed = new Promise(resolve => {
+        // destination
+        var destination = path.join(app.getPath('home'), "homebrew")
+        if (!fs.existsSync(destination)){
+            try {
+                fs.mkdirSync(destination);
+            } catch(e) {
+                logger.error(e)
+                resolve(false)
+                return;
+            }
+        }
+        // download
+        exec(`cd ${destination} && curl -L https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C ${destination}`, 
+            function(error, stdout, stderr) {
+                if (error) {
+                    logger.error(`Error downloading brew: \n${error}`)
+                    resolve(false)
+                    return;
+                };
+                resolve(true)
+            }
+        );
+    })
+    return installed;
+}
+
+function getCommandPrefix() {
+    return command_prefix;
+}
+
 module.exports.registerIpc = registerIpc
 module.exports.getYubikey = getYubikey
+module.exports.getCommandPrefix = getCommandPrefix

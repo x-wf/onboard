@@ -3,6 +3,7 @@ const fs = require('fs')
 const tmp = require('tmp');
 const path = require('path');
 const log4js = require('log4js');
+const yubikey = require('./yubikey');
 const logger = log4js.getLogger('app'); 
 const compile = require("string-template/compile")
 
@@ -59,7 +60,7 @@ async function createConfig(directory) {
 async function generatePassword() {
     
     var password = await new Promise(resolve => {
-        exec('gpg --gen-random -a 0 16', (err, stdout, stderr) => {
+        exec(`${yubikey.getCommandPrefix()}gpg --gen-random -a 0 16`, (err, stdout, stderr) => {
             if(err) {
                 logger.error(err)
                 resolve(null);
@@ -91,7 +92,7 @@ async function createKeyFile(name, email, expiration, password) {
             fs.writeFileSync(path, data)
 
             // generate master key
-            exec(`gpg --batch --generate-key ${path}`, (err, stdout, stderr) => {
+            exec(`${yubikey.getCommandPrefix()}gpg --batch --generate-key ${path}`, (err, stdout, stderr) => {
                 if(err) {
                     logger.error(err)
                     resolve(false);
@@ -110,7 +111,7 @@ async function createKeyFile(name, email, expiration, password) {
                     // generate subkeys
 
                     // sign
-                    exec(`gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
+                    exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
                         if(err) {
                             logger.error(err)
                             resolve(false);
@@ -118,7 +119,7 @@ async function createKeyFile(name, email, expiration, password) {
                         }
 
                         // auth
-                        exec(`gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
+                        exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
                             if(err) {
                                 logger.error(err)
                                 resolve(false);
