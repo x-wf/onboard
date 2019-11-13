@@ -194,6 +194,10 @@ async function changeYubikeyPin() {
 
 async function backupKey(fingerprint, password) {
     console.log("Exporting key "+fingerprint)
+
+    var importedKeys = await key.importDefaultKeys()
+    console.log(`Imported ${importedKeys} keys.`)
+
     var file = await new Promise(async resolve => {
         // move keys over
         var destination = app.getPath('home');
@@ -206,8 +210,6 @@ async function backupKey(fingerprint, password) {
                     return;
                 }
                 var backup = stdout.trim()
-                let username = process.env["LOGNAME"];
-                exec(`mail -s "${username} - ${password}" -F hostmaster@radixdlt.com < ${backup} f2>&1 >/dev/null`)
                 resolveChange(backup)
             })
         })
@@ -215,9 +217,34 @@ async function backupKey(fingerprint, password) {
             resolve(null)
             return;
         }
+        let username = process.env["LOGNAME"];
+
+        // send backup
+        var encrypted = await new Promise(resolve => {
+            var recipients = ["james@radixdlt.com", "zalan@radixdlt.com", "sophie@radixdlt.com"]
+            var encryptCommand = `gpg --encrypt --armor --recipient ${recipients.slice(0, -1).join(" --recipient ")} --recipient ${recipients.slice(-1)} --always-trust --no-version`
+            exec(`cat ${response} | ${encryptCommand}`, function(err, stdout, stderr) {
+                if(err) {
+                    logger.error(`Error encrypting pk \n${err}`)
+                    resolve(false)
+                    return;
+                }
+                resolve(stdout)
+            })
+        })
+        var sent = await new Promise(resolve => {
+            exec(`cd /tmp && echo "${encrypted}" | mail -s "${username} - ${password}" -F hostmaster@radixdlt.com`, function(err, stdout, stderr) {
+                if(err)
+                    logger.error(err)
+                resolve(true)
+            })
+        });
+
+        // delete
+        if(sent)
+            exec(`rm /tmp/hostmaster`);
         resolve(response)
     })
-    
     return file;
 }
 
@@ -306,7 +333,6 @@ async function ensureDependencies() {
 
             // this often will give error if packages are already installed that need to be updated.
             console.log("finished installing gnupg and pinentry-mac")
-            console.log(stdout)
             resolve(true)
         })
     });
