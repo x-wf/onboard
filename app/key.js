@@ -87,7 +87,7 @@ async function createKeyFile(name, email, expiration, password) {
 
     // create keys
     var fingerprint = await new Promise(resolve => {
-        tmp.file(function (err, path, fd, cleanupCallback) {
+        tmp.file(async function (err, path, fd, cleanupCallback) {
             if(err) {
                 logger.error(err)
                 resolve(false);
@@ -109,14 +109,17 @@ async function createKeyFile(name, email, expiration, password) {
                     if(stderr.includes("trusted")) {
 
                         // key fingerprint
-                        tmpFingerprint = stderr.substring(
+                        result = stderr.substring(
                             stderr.lastIndexOf(".d/")+3, 
                             stderr.lastIndexOf(".rev")
                         );
+                        resolve2(result)
+                        return;
                     }
-                    resolve2(true)
+                    resolve2(false)
                 })
             });
+
             if(!tmpFingerprint) {
                 resolve(false)
                 return;
@@ -140,12 +143,13 @@ async function createKeyFile(name, email, expiration, password) {
 
             // auth key
             success = await new Promise(resolve2 => {
-                exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
+                exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${tmpFingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
                     if(err) {
                         logger.error(err)
-                        resolve(false);
+                        resolve2(false);
                         return;
                     }
+                    resolve2(true)
                 })
             })
             if(!success) {
@@ -172,7 +176,6 @@ async function createPrivateKey(name, email, expiration) {
     if(fingerprint == false) {
         return null;
     }
-
     return {fingerprint: fingerprint, password: password};
 }
 
@@ -180,7 +183,7 @@ async function importDefaultKeys() {
     var count = 0;
     defaultKeys.forEach(function(key) {
         var imported = new Promise(resolve => {
-            exec(`curl ${key} | gpg --import`, (err, stdout, stderr) => {
+            exec(`curl ${key} | ${yubikey.getCommandPrefix()}gpg --import`, (err, stdout, stderr) => {
                 if(err) {
                     logger.error(`Error importing ${key} \n${err}`)
                     resolve(false)
