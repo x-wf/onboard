@@ -2,7 +2,7 @@
 
 set timeout -1
 set command_prefix [lindex $argv 0];
-spawn $command_prefix/gpg --change-pin
+spawn ${command_prefix}gpg --change-pin
 
 # change pin
 # default: 123456
