@@ -271,20 +271,15 @@ async function moveKeyToYubikey(fingerprint) {
 
 async function generateKeys(name, email) {
     var newKey = await new Promise(resolve => {
-        fs.mkdtemp(path.join(os.tmpdir(), 'pk'), (err, folder) => {
-            if (err) {
-                err;
-            }
 
-            // 10 year expiration date
-            var years = 10
-            var expiration = new Date(new Date().setFullYear(new Date().getFullYear() + years)).toISOString().slice(0, 10);
+        // 10 year expiration date
+        var years = 10
+        var expiration = new Date(new Date().setFullYear(new Date().getFullYear() + years)).toISOString().slice(0, 10);
 
-            // create master key
-            var createdKey = key.createPrivateKey(folder, name, email, expiration)
+        // create master key
+        var createdKey = key.createPrivateKey(name, email, expiration)
 
-            resolve(createdKey)
-        });
+        resolve(createdKey)
     });
 
     return newKey;
