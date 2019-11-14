@@ -1,7 +1,8 @@
 #!/usr/bin/expect -f
 
 set timeout -1
-spawn gpg --change-pin
+set command_prefix [lindex $argv 0];
+spawn ${command_prefix}gpg --change-pin
 
 # change pin
 # default: 123456

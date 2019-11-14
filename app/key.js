@@ -87,7 +87,7 @@ async function createKeyFile(name, email, expiration, password) {
 
     // create keys
     var fingerprint = await new Promise(resolve => {
-        tmp.file(function (err, path, fd, cleanupCallback) {
+        tmp.file(async function (err, path, fd, cleanupCallback) {
             if(err) {
                 logger.error(err)
                 resolve(false);
@@ -97,61 +97,73 @@ async function createKeyFile(name, email, expiration, password) {
             // write file 
             fs.writeFileSync(path, data)
 
-            // generate master key
-            exec(`${yubikey.getCommandPrefix()}gpg --batch --generate-key ${path}`, (err, stdout, stderr) => {
-                if(err) {
-                    logger.error(err)
-                    resolve(false);
-                    return;
-                }
+            // master key
+            var tmpFingerprint = await new Promise(resolve2 => {
+                exec(`${yubikey.getCommandPrefix()}gpg --batch --generate-key ${path}`, (err, stdout, stderr) => {
+                    if(err) {
+                        logger.error(err)
+                        resolve2(false);
+                        return;
+                    }
+                    // it prints to stderr
+                    if(stderr.includes("trusted")) {
 
-                // it prints to stderr
-                if(stderr.includes("trusted")) {
+                        // key fingerprint
+                        result = stderr.substring(
+                            stderr.lastIndexOf(".d/")+3, 
+                            stderr.lastIndexOf(".rev")
+                        );
+                        resolve2(result)
+                        return;
+                    }
+                    resolve2(false)
+                })
+            });
 
-                    // key fingerprint
-                    var fingerprint = stderr.substring(
-                        stderr.lastIndexOf(".d/")+3, 
-                        stderr.lastIndexOf(".rev")
-                    );
+            if(!tmpFingerprint) {
+                resolve(false)
+                return;
+            }
 
-                    // generate subkeys
-
-                    // sign
-                    exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
-                        if(err) {
-                            logger.error(err)
-                            resolve(false);
-                            return;
-                        }
-
-                        // auth
-                        exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${fingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
-                            if(err) {
-                                logger.error(err)
-                                resolve(false);
-                                return;
-                            }
-    
-                            resolve(fingerprint);
-                        });
-                    });
-                }
-                else
-                    resolve(false);
+            // sign key
+            success = await new Promise(resolve2 => {
+                exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${tmpFingerprint}" rsa4096 sign "${expiration}"`, (err, stdout, stderr) => {
+                    if(err) {
+                        logger.error(err)
+                        resolve2(false);
+                        return;
+                    }
+                    resolve2(true);
+                })
             })
+            if(!success) {
+                resolve(false)
+                return;
+            }
+
+            // auth key
+            success = await new Promise(resolve2 => {
+                exec(`${yubikey.getCommandPrefix()}gpg --batch --pinentry-mode loopback --passphrase="${password}" --yes --quick-add-key "${tmpFingerprint}" rsa4096 auth "${expiration}"`, (err, stdout, stderr) => {
+                    if(err) {
+                        logger.error(err)
+                        resolve2(false);
+                        return;
+                    }
+                    resolve2(true)
+                })
+            })
+            if(!success) {
+                resolve(false)
+                return;
+            }
+            resolve(tmpFingerprint)
         });
     });
 
     return fingerprint;
 }
 
-async function createPrivateKey(directory, name, email, expiration) {
-
-    // config
-    var success = await createConfig(directory)
-    if(!success) {
-        return null;
-    }
+async function createPrivateKey(name, email, expiration) {
 
     // password
     var password = await generatePassword()
@@ -164,7 +176,6 @@ async function createPrivateKey(directory, name, email, expiration) {
     if(fingerprint == false) {
         return null;
     }
-
     return {fingerprint: fingerprint, password: password};
 }
 
@@ -172,7 +183,7 @@ async function importDefaultKeys() {
     var count = 0;
     defaultKeys.forEach(function(key) {
         var imported = new Promise(resolve => {
-            exec(`curl ${key} | gpg --import`, (err, stdout, stderr) => {
+            exec(`curl ${key} | ${yubikey.getCommandPrefix()}gpg --import`, (err, stdout, stderr) => {
                 if(err) {
                     logger.error(`Error importing ${key} \n${err}`)
                     resolve(false)
