@@ -40,6 +40,9 @@ function registerIpc(ipcMain) {
 
         event.reply('console-message', "Checking yubikey...")
 
+        // restart gpg-agent just in case
+        var restarted = await restartGpgAgent()
+
         // check yubikey
         found = await getYubikey();
         if(!found) {
@@ -368,16 +371,7 @@ async function ensureDependencies() {
         // if pinentry-mac has been successfully changed
         if(configured) {
             // restart agent
-            var restarted = await new Promise(resolve=>{
-                exec(`${command_prefix}gpgconf --kill gpg-agent && ${command_prefix}gpgconf --launch gpg-agent`, function(err, stdout, stderr) {
-                    if(err) {
-                        logger.error("Error restarting the gpg-agent. \n" + err)
-                        resolve(false)
-                        return;
-                    }
-                    resolve(true)
-                })
-            })
+            var restarted = restartGpgAgent()
         }
     }
     return true;
@@ -446,6 +440,20 @@ async function installBrew() {
         );
     })
     return installed;
+}
+
+async function restartGpgAgent() {
+    var restarted = new Promise(resolve=>{
+        exec(`${command_prefix}gpgconf --kill gpg-agent && ${command_prefix}gpgconf --launch gpg-agent`, function(err, stdout, stderr) {
+            if(err) {
+                logger.error("Error restarting the gpg-agent. \n" + err)
+                resolve(false)
+                return;
+            }
+            resolve(true)
+        })
+    })
+    return restarted
 }
 
 function getCommandPrefix() {
