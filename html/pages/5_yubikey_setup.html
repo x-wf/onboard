@@ -8,10 +8,13 @@
 
     <div class="width-100">
         <select id="yubikey-console" class="console-box width-100" size="15">
-            <option selected>By creating a key, the program will generate a private key and a passphrase for the key.</option>
-            <option selected>After generating the key, you will be able to store the private key on your Yubikey.</option>
-            <option selected>When you start to move the key, you will be prompted to change the default pin and admin pin.</option>
-            <option selected>Start by inserting a blank Yubikey into your Macbook, and press "Create Key".</option>
+            <option>By creating a key, the program will generate a key, a subset of keys, and a passphrase to access them.</option>
+            <option>After generating the key, you will be able to store the subset of keys on your Yubikey.</option>
+            <option></option>
+            <option>For security reasons, before you move the subset of keys, you will need to change the default pin of the Yubikey.</option>
+            <option>To move the subset of keys, you will need the default admin pin: 12345678.</option>
+            <option></option>
+            <option selected>Start by inserting a blank Yubikey into your Macbook, and press "Create Key"!</option>
         </select>
     </div>
     <div class="width-100" style="display: flex;">
