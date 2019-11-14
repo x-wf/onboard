@@ -2,8 +2,9 @@
 
 set timeout -1
 set fingerprint [lindex $argv 0];
+set command_prefix [lindex $argv 1];
 
-spawn gpg --edit-key $fingerprint
+spawn $command_prefix/gpg --edit-key $fingerprint
 expect  "gpg> "
 
 # subkey 1

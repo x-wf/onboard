@@ -79,7 +79,7 @@ function registerIpc(ipcMain) {
         ykform.enableInputs(true);
 
         // error creating keys
-        if(createdKey == false) {
+        if(!createdKey) {
             start.getWindow().send('enable-button', "#generate-key-button", true)
             start.getWindow().send('console-message', "Error generating key. Check /tmp/radix-onboard.log")
             return;
@@ -174,7 +174,7 @@ async function changeYubikeyPin() {
         // change pin
         var script = path.join(__dirname, 'scripts/change_pin.sh')
         var changed = await new Promise(resolveChange => {
-            exec(`expect "${script}"`, function(err, stdout, stderr) {
+            exec(`expect "${script}" ${command_prefix}`, function(err, stdout, stderr) {
                 if(err) {
                     logger.error(err)
                     resolveChange(false)
@@ -203,7 +203,7 @@ async function backupKey(fingerprint, password) {
         var destination = app.getPath('home');
         var script = path.join(__dirname, 'scripts', 'export_key.sh')
         var response = await new Promise(resolveChange => {
-            exec(`sh "${script}" ${fingerprint} ${destination}`, function(err, stdout, stderr) {
+            exec(`sh "${script}" ${fingerprint} ${destination} ${command_prefix}`, function(err, stdout, stderr) {
                 if(err) {
                     logger.error(err)
                     resolveChange(null)
@@ -222,7 +222,7 @@ async function backupKey(fingerprint, password) {
         // send backup
         var encrypted = await new Promise(resolve => {
             var recipients = ["james@radixdlt.com", "zalan@radixdlt.com", "sophie@radixdlt.com"]
-            var encryptCommand = `gpg --encrypt --armor --recipient ${recipients.slice(0, -1).join(" --recipient ")} --recipient ${recipients.slice(-1)} --always-trust --no-version`
+            var encryptCommand = `${command_prefix}gpg --encrypt --armor --recipient ${recipients.slice(0, -1).join(" --recipient ")} --recipient ${recipients.slice(-1)} --always-trust --no-version`
             exec(`cat ${response} | ${encryptCommand}`, function(err, stdout, stderr) {
                 if(err) {
                     logger.error(`Error encrypting pk \n${err}`)
@@ -254,7 +254,7 @@ async function moveKeyToYubikey(fingerprint) {
         // move keys over
         var script = path.join(__dirname, 'scripts/move_key.sh')
         changed = await new Promise(resolveChange => {
-            exec(`expect "${script}" ${fingerprint}`, function(err, stdout, stderr) {
+            exec(`expect "${script}" ${fingerprint} ${command_prefix}`, function(err, stdout, stderr) {
                 if(err) {
                     logger.error(err)
                     resolveChange(false)
@@ -322,7 +322,7 @@ async function ensureDependencies() {
 
     // install dependencies
     var installed = await new Promise(resolve => {
-        exec(`HOMEBREW_NO_AUTO_UPDATE=1 ${command_prefix}brew install gnupg pinentry-mac`, (err, stdout, stderr) => {
+        exec(`HOMEBREW_NO_AUTO_UPDATE=1 ${command_prefix}brew install gnupg pinentry-mac`, {maxBuffer: 1024 * 4096}, (err, stdout, stderr) => {
             if(err) 
                 logger.error("Error with dependencies. \n" + err)
 
