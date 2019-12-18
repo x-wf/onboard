@@ -14,17 +14,18 @@ steps:
   displayName: 'Install npm dependencies'
 
 - task: YarnInstaller@3
+  displayName: 'Install yarn'
   inputs:
     versionSpec: '1.x'
     checkLatest: true
 
 - task: Yarn@3
+  displayName: 'Install yarn dependencies'
   inputs:
     arguments: 'install'
 
 - task: Yarn@3
+  displayName: 'Create dist package with yarn'
   inputs:
     arguments: 'dist'
 
-- script: yarn build
-  displayName: 'Build application'
