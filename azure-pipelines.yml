@@ -33,4 +33,4 @@ steps:
 - task: Yarn@3
   displayName: 'Create dist package with yarn'
   inputs:
-    arguments: 'dist:mac'
+    arguments: 'dist:mac --publish=never'
