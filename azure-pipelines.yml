@@ -27,5 +27,5 @@ steps:
 - task: Yarn@3
   displayName: 'Create dist package with yarn'
   inputs:
-    arguments: 'dist'
+    arguments: 'dist:mac'
 
