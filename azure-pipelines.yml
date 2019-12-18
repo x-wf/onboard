@@ -10,5 +10,8 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- script: npm install
+  displayName: 'Install npm dependencies'
+
 - script: yarn build
-  displayName: 'Building...'
+  displayName: 'Build application'
